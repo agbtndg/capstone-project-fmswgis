@@ -35,14 +35,41 @@ def terms_of_service_view(request):
 
 @login_required
 def map_view(request):
+    from monitoring.models import RainfallData, WeatherData, TideLevelData
+    from monitoring.views import get_flood_risk_level, get_tide_risk_level, get_combined_risk_level
+    
     barangays = serialize('geojson', Barangay.objects.all(), geometry_field='geometry', fields=('id', 'name', 'parent_id', 'geometry'))
     flood_areas = serialize('geojson', FloodSusceptibility.objects.all(), geometry_field='geometry', fields=('lgu', 'psgc_lgu', 'haz_class', 'haz_code', 'haz_area_ha', 'geometry'))
     barangay_names = Barangay.objects.values_list('name', flat=True).order_by('name')
-    return render(request, 'maps/map.html', {
+    
+    # Get latest monitoring data (same as monitoring page, exclude null timestamps)
+    rainfall_data = RainfallData.objects.filter(timestamp__isnull=False).first()
+    weather_data = WeatherData.objects.filter(timestamp__isnull=False).first()
+    tide_data = TideLevelData.objects.filter(timestamp__isnull=False).first()
+    
+    # Calculate risk levels using the same functions as monitoring page
+    context = {
         'barangays_json': barangays,
         'flood_areas_json': flood_areas,
-        'barangay_names': barangay_names
-    })
+        'barangay_names': barangay_names,
+        'rainfall_data': rainfall_data,
+        'weather_data': weather_data,
+        'tide_data': tide_data,
+    }
+    
+    if rainfall_data:
+        rain_risk_level, rain_risk_color = get_flood_risk_level(rainfall_data.value_mm)
+        context['rain_risk'] = {'level': rain_risk_level, 'color': rain_risk_color}
+        
+    if tide_data:
+        tide_risk_level, tide_risk_color = get_tide_risk_level(tide_data.height_m)
+        context['tide_risk'] = {'level': tide_risk_level, 'color': tide_risk_color}
+    
+    if rainfall_data and tide_data:
+        combined_risk_level, combined_risk_color = get_combined_risk_level(rainfall_data.value_mm, tide_data.height_m)
+        context['combined_risk'] = {'level': combined_risk_level, 'color': combined_risk_color}
+    
+    return render(request, 'maps/map.html', context)
 
 @login_required
 def report_view(request):

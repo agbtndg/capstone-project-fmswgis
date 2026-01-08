@@ -430,10 +430,10 @@ def monitoring_view(request):
         time_filter = now - timedelta(hours=24)  # Default fallback
         range_label = 'Last 24 Hours'
     
-    # Fetch or create initial data
-    rainfall_data = RainfallData.objects.last()
-    weather_data = WeatherData.objects.last()
-    tide_data = TideLevelData.objects.last()
+    # Fetch or create initial data (exclude null timestamps)
+    rainfall_data = RainfallData.objects.filter(timestamp__isnull=False).first()
+    weather_data = WeatherData.objects.filter(timestamp__isnull=False).first()
+    tide_data = TideLevelData.objects.filter(timestamp__isnull=False).first()
 
     # Initialize forecast data
     weather_forecast = []
@@ -531,7 +531,7 @@ def monitoring_view(request):
         logger.error(f"Unexpected error fetching weather data: {e}")
 
     # Fetch tide data from WorldTides (Cebu City)
-    if not tide_data or not tide_data.timestamp or (timezone.now() - tide_data.timestamp).total_seconds() > 10800:
+    if not tide_data or not tide_data.timestamp or (timezone.now() - tide_data.timestamp).total_seconds() > 3600:
         worldtides_api_key = getattr(settings, 'WORLDTIDES_API_KEY', None)
         if worldtides_api_key:
             try:
@@ -545,11 +545,11 @@ def monitoring_view(request):
                     'days': 1
                 }
                 
-                # Cache tide data for 3 hours
+                # Cache tide data for 1 hour
                 cache_key = f"worldtides_cebu_{timezone.now().strftime('%Y%m%d_%H')}"
                 
                 logger.info(f"Fetching WorldTides API for Cebu City: {tide_api_url}")
-                tide_data_json, from_cache = fetch_api_with_cache(tide_api_url, tide_params, cache_key, cache_timeout=10800)
+                tide_data_json, from_cache = fetch_api_with_cache(tide_api_url, tide_params, cache_key, cache_timeout=3600)
                 
                 if tide_data_json:
                     heights = tide_data_json.get('heights', [])
@@ -786,8 +786,8 @@ def get_current_risk_status(request):
     try:
         from django.utils.timezone import localtime
         
-        rainfall_data = RainfallData.objects.first()
-        tide_data = TideLevelData.objects.first()
+        rainfall_data = RainfallData.objects.filter(timestamp__isnull=False).first()
+        tide_data = TideLevelData.objects.filter(timestamp__isnull=False).first()
         
         # Get current values
         current_rainfall_mm = rainfall_data.value_mm if rainfall_data else 0
@@ -822,7 +822,12 @@ def get_current_risk_status(request):
             }
         }
         
-        return JsonResponse(data)
+        # Return with no-cache headers to ensure fresh data
+        response = JsonResponse(data)
+        response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response['Pragma'] = 'no-cache'
+        response['Expires'] = '0'
+        return response
     except Exception as e:
         logger.error(f"Error in get_current_risk_status: {e}")
         return JsonResponse({'error': 'Unable to fetch risk status'}, status=500)
@@ -831,9 +836,9 @@ def get_current_risk_status(request):
 def fetch_data_api(request):
     """API endpoint for AJAX updates with error handling."""
     try:
-        rainfall_data = RainfallData.objects.last()
-        weather_data = WeatherData.objects.last()
-        tide_data = TideLevelData.objects.last()
+        rainfall_data = RainfallData.objects.filter(timestamp__isnull=False).first()
+        weather_data = WeatherData.objects.filter(timestamp__isnull=False).first()
+        tide_data = TideLevelData.objects.filter(timestamp__isnull=False).first()
         
         data = {
             'rainfall': rainfall_data.value_mm if rainfall_data else 0,
@@ -847,10 +852,114 @@ def fetch_data_api(request):
                 'tide': tide_data.timestamp.strftime('%b %d, %Y %H:%M') if tide_data and tide_data.timestamp else '',
             }
         }
-        return JsonResponse(data)
+        # Return with no-cache headers to ensure fresh data
+        response = JsonResponse(data)
+        response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response['Pragma'] = 'no-cache'
+        response['Expires'] = '0'
+        return response
     except Exception as e:
         logger.error(f"Error in fetch_data_api: {e}")
         return JsonResponse({'error': 'Unable to fetch data'}, status=500)
+
+@login_required
+def get_historical_risk_data(request):
+    """API endpoint for time-series - returns historical flood risk data by timestamp."""
+    try:
+        from django.utils.timezone import localtime
+        from datetime import datetime
+        
+        # Get the requested timestamp from query parameters
+        timestamp_str = request.GET.get('timestamp')
+        if not timestamp_str:
+            return JsonResponse({'error': 'Timestamp parameter required'}, status=400)
+        
+        try:
+            # Parse the timestamp (expected format: YYYY-MM-DD HH:MM)
+            requested_time = timezone.datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M')
+            requested_time = timezone.make_aware(requested_time, timezone.get_current_timezone())
+        except ValueError:
+            return JsonResponse({'error': 'Invalid timestamp format. Use YYYY-MM-DD HH:MM'}, status=400)
+        
+        # Find the closest records to the requested timestamp (within 30 minutes)
+        time_range_start = requested_time - timedelta(minutes=30)
+        time_range_end = requested_time + timedelta(minutes=30)
+        
+        rainfall_data = RainfallData.objects.filter(
+            timestamp__isnull=False,
+            timestamp__gte=time_range_start,
+            timestamp__lte=time_range_end
+        ).order_by('timestamp').first()
+        
+        tide_data = TideLevelData.objects.filter(
+            timestamp__isnull=False,
+            timestamp__gte=time_range_start,
+            timestamp__lte=time_range_end
+        ).order_by('timestamp').first()
+        
+        weather_data = WeatherData.objects.filter(
+            timestamp__isnull=False,
+            timestamp__gte=time_range_start,
+            timestamp__lte=time_range_end
+        ).order_by('timestamp').first()
+        
+        # If no data found in the time range, return error
+        if not rainfall_data or not tide_data:
+            return JsonResponse({
+                'error': 'No data available for the requested time',
+                'timestamp': timestamp_str
+            }, status=404)
+        
+        # Get current values
+        current_rainfall_mm = rainfall_data.value_mm if rainfall_data else 0
+        current_tide_m = tide_data.height_m if tide_data else 0
+        
+        # Calculate risk levels
+        rain_risk_level, rain_risk_color = get_flood_risk_level(current_rainfall_mm)
+        tide_risk_level, tide_risk_color = get_tide_risk_level(current_tide_m)
+        combined_risk_level, combined_risk_color = get_combined_risk_level(current_rainfall_mm, current_tide_m)
+        
+        # Determine which zones to highlight based on risk level
+        zones_to_highlight = []
+        if combined_risk_level == "High Risk":
+            zones_to_highlight = ['VHF', 'HF']
+        elif combined_risk_level == "Moderate Risk":
+            zones_to_highlight = ['VHF', 'HF', 'MF']
+        
+        # Get benchmark thresholds for reference
+        settings = BenchmarkSettings.get_settings()
+        
+        data = {
+            'risk_level': combined_risk_level,
+            'risk_color': combined_risk_color,
+            'rain_risk_level': rain_risk_level,
+            'tide_risk_level': tide_risk_level,
+            'rainfall_mm': current_rainfall_mm,
+            'tide_m': current_tide_m,
+            'temperature_c': weather_data.temperature_c if weather_data else None,
+            'humidity_percent': weather_data.humidity_percent if weather_data else None,
+            'wind_speed_kph': weather_data.wind_speed_kph if weather_data else None,
+            'zones_to_highlight': zones_to_highlight,
+            'timestamp': localtime(rainfall_data.timestamp).strftime('%b %d, %Y %I:%M %p') if rainfall_data.timestamp else timestamp_str,
+            'requested_time': timestamp_str,
+            'is_historical': True,
+            'thresholds': {
+                'rainfall_moderate': settings.rainfall_moderate_threshold,
+                'rainfall_high': settings.rainfall_high_threshold,
+                'tide_moderate': settings.tide_moderate_threshold,
+                'tide_high': settings.tide_high_threshold,
+            }
+        }
+        
+        # Return with no-cache headers
+        response = JsonResponse(data)
+        response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response['Pragma'] = 'no-cache'
+        response['Expires'] = '0'
+        return response
+    except Exception as e:
+        logger.error(f"Error in get_historical_risk_data: {e}")
+        return JsonResponse({'error': f'Unable to fetch historical data: {str(e)}'}, status=500)
 
 @login_required
 def fetch_trends_api(request):

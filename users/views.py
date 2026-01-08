@@ -288,9 +288,9 @@ def home(request):
     from django.db.models import Q
     
     
-    rainfall_data = RainfallData.objects.last()
-    weather_data = WeatherData.objects.last()
-    tide_data = TideLevelData.objects.last()
+    rainfall_data = RainfallData.objects.filter(timestamp__isnull=False).first()
+    weather_data = WeatherData.objects.filter(timestamp__isnull=False).first()
+    tide_data = TideLevelData.objects.filter(timestamp__isnull=False).first()
     recent_floods = FloodRecord.objects.all().order_by('-date')[:3]
     
     # Calculate highest risk barangay based on flood susceptibility data

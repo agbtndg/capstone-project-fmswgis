@@ -553,7 +553,6 @@
         .metric-label {
             display: flex;
             align-items: center;
-            justify-content: space-between;
             color: var(--text-muted);
             margin-bottom: 12px;
             font-size: 12px;
@@ -565,29 +564,7 @@
         .metric-label-text {
             display: flex;
             align-items: center;
-        }
-        
-        /* Weather Icon Display */
-        .weather-icon {
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
-            opacity: 0.6;
-            filter: grayscale(20%);
-            font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
-            line-height: 1;
-        }
-            display: flex;
-            align-items: center;
-            color: var(--text-muted);
-            margin-bottom: 8px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
+            gap: 8px;
         }
 
         .metric-value {
@@ -597,6 +574,181 @@
             display: flex;
             align-items: center;
             gap: 8px;
+        }
+
+        /* Loading Skeleton */
+        .metric-item.loading .metric-value {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .metric-item.loading::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%);
+            animation: skeleton-shimmer 1.5s infinite;
+            border-radius: 16px;
+        }
+
+        @keyframes skeleton-shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Data Freshness Indicator */
+        .data-freshness {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 600;
+        }
+
+        .data-freshness i {
+            font-size: 9px;
+        }
+
+        .freshness-good { color: #10b981; }
+        .freshness-medium { color: #f59e0b; }
+        .freshness-stale { color: #ef4444; }
+
+        /* Error Alert */
+        .api-error-alert {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: linear-gradient(135deg, #fee2e2, #fef2f2);
+            border: 2px solid #fca5a5;
+            border-left: 4px solid #ef4444;
+            border-radius: 12px;
+            padding: 16px 20px;
+            box-shadow: 0 10px 40px rgba(239, 68, 68, 0.3);
+            z-index: 10000;
+            max-width: 400px;
+            animation: slideInRight 0.5s ease;
+            display: none;
+        }
+
+        .api-error-alert.show {
+            display: block;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(450px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .error-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            color: #991b1b;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .error-header i {
+            font-size: 16px;
+        }
+
+        .error-message {
+            color: #7f1d1d;
+            font-size: 12px;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        .error-close {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: none;
+            border: none;
+            color: #991b1b;
+            cursor: pointer;
+            font-size: 18px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .error-close:hover {
+            background: rgba(153, 27, 27, 0.1);
+        }
+
+        .error-retry {
+            padding: 8px 16px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .error-retry:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+        }
+
+        /* Offline Alert */
+        .offline-alert {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #fef3c7, #fef9c3);
+            border: 2px solid #fbbf24;
+            border-radius: 12px;
+            padding: 12px 20px;
+            box-shadow: 0 10px 40px rgba(251, 191, 36, 0.3);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #92400e;
+        }
+
+        .offline-alert.show {
+            display: flex;
+            animation: slideInUp 0.5s ease;
+        }
+
+        @keyframes slideInUp {
+            from {
+                transform: translate(-50%, 100px);
+                opacity: 0;
+            }
+            to {
+                transform: translate(-50%, 0);
+                opacity: 1;
+            }
+        }
+
+        .offline-alert i {
+            color: #f59e0b;
+            font-size: 16px;
         }
 
         .trend-indicator {
@@ -1367,6 +1519,37 @@
                 width: 250px;
                 font-size: 11px;
                 padding: 10px 14px;
+            }
+
+            /* Mobile responsive for error and offline alerts */
+            .api-error-alert {
+                top: 60px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
+            }
+
+            .offline-alert {
+                bottom: 10px;
+                left: 10px;
+                right: 10px;
+                transform: none;
+                font-size: 12px;
+            }
+
+            .offline-alert.show {
+                animation: slideInUpMobile 0.5s ease;
+            }
+
+            @keyframes slideInUpMobile {
+                from {
+                    transform: translateY(100px);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateY(0);
+                    opacity: 1;
+                }
             }
         }
 
@@ -3481,19 +3664,6 @@
             letter-spacing: 0.5px;
         }
 
-        .live-pulse {
-            width: 8px;
-            height: 8px;
-            background: #ef4444;
-            border-radius: 50%;
-            animation: pulse-live 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse-live {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.2); }
-        }
-
         /* Refresh Countdown Badge */
         .refresh-countdown {
             display: inline-flex;
@@ -3536,12 +3706,6 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-left: 8px;
-        }
-
-        .badge-realtime {
-            background: #fef2f2;
-            color: #dc2626;
-            border: 1px solid #fecaca;
         }
 
         .badge-updated {
@@ -4045,6 +4209,27 @@
 
 {% block content %}
 <div class="content-wrapper">
+    <!-- Error Alert -->
+    <div class="api-error-alert" id="apiErrorAlert" role="alert" aria-live="assertive">
+        <button class="error-close" onclick="closeErrorAlert()" aria-label="Close error alert">&times;</button>
+        <div class="error-header">
+            <i class="fas fa-exclamation-circle"></i>
+            <span>Connection Error</span>
+        </div>
+        <div class="error-message" id="errorMessage">
+            Unable to fetch latest data from the server. Data may be outdated.
+        </div>
+        <button class="error-retry" onclick="retryFetch()">
+            <i class="fas fa-sync-alt"></i> Retry Now
+        </button>
+    </div>
+
+    <!-- Offline Alert -->
+    <div class="offline-alert" id="offlineAlert" role="alert" aria-live="polite">
+        <i class="fas fa-wifi-slash"></i>
+        <span>You are offline. Reconnect to get latest updates.</span>
+    </div>
+
     <!-- Page Header -->
     <div class="page-header">
         <div>
@@ -4112,7 +4297,7 @@
             </div>
             
             <div style="margin-top: 10px; padding: 8px; background: rgba(59, 130, 246, 0.15); border-radius: 6px; font-size: 11px; color: #bfdbfe;">
-                <i class="fas fa-info-circle"></i> <strong>Note:</strong> Risk calculated using benchmark thresholds. Data updates hourly (rainfall/weather) and every 3 hours (tides).
+                <i class="fas fa-info-circle"></i> <strong>Note:</strong> Risk calculated using benchmark thresholds. All data (rainfall, weather, and tides) updates hourly.
             </div>
         </div>
     </div>
@@ -4121,18 +4306,20 @@
     <div class="card" id="current-conditions">
         <h2>
             <i class="fas fa-gauge-high"></i> Current Conditions
-            <span class="status-badge badge-realtime"><span class="live-pulse"></span> Live</span>
             <span class="help-icon">?
-                <span class="help-tooltip">Real-time environmental data from Open-Meteo API. Updates hourly for Silay City, Negros Occidental.</span>
+                <span class="help-tooltip">Real-time environmental data from Open-Meteo API (rainfall, temperature, humidity, wind) and WorldTides API (tide levels). All data updates hourly. Weather data for Silay City, Negros Occidental; tide data from Cebu City station.</span>
             </span>
         </h2>
         <div class="metrics-grid">
-            <div class="metric-item">
+            <div class="metric-item" role="region" aria-label="Rainfall measurement">
                 <div class="metric-label">
-                    <span class="metric-label-text"><i class="fas fa-cloud-rain"></i> Rainfall</span>
-                    <span class="weather-icon">{% if rainfall_data.value_mm >= 50 %}🌧️{% elif rainfall_data.value_mm >= 30 %}🌦️{% elif rainfall_data.value_mm >= 10 %}☁️{% else %}⛅{% endif %}</span>
+                    <span class="metric-label-text"><i class="fas fa-cloud-rain" aria-hidden="true"></i> Rainfall</span>
                 </div>
-                <div class="metric-value" data-rainfall>{{ rainfall_data.value_mm }} mm<span class="trend-indicator" data-trend-rainfall style="display:none;"></span></div>
+                <div class="metric-value" data-rainfall aria-live="polite">{{ rainfall_data.value_mm }} mm<span class="trend-indicator" data-trend-rainfall style="display:none;"></span></div>
+                <div class="data-freshness" data-freshness-rainfall>
+                    <i class="fas fa-clock" aria-hidden="true"></i>
+                    <span>Checking...</span>
+                </div>
                 <div class="metric-tooltip">
                     <div style="font-weight: 700; margin-bottom: 8px; font-size: 13px; color: #60a5fa;"><i class="fas fa-cloud-rain"></i> Rainfall Measurement</div>
                     <div style="font-size: 11px; line-height: 1.6;">
@@ -4157,12 +4344,15 @@
                 </div>
             </div>
 
-            <div class="metric-item">
+            <div class="metric-item" role="region" aria-label="Temperature measurement">
                 <div class="metric-label">
-                    <span class="metric-label-text"><i class="fas fa-thermometer-half"></i> Temperature</span>
-                    <span class="weather-icon">{% if weather_data.temperature_c >= 35 %}🥵{% elif weather_data.temperature_c >= 32 %}☀️{% elif weather_data.temperature_c >= 28 %}🌤️{% elif weather_data.temperature_c >= 24 %}⛅{% else %}🌥️{% endif %}</span>
+                    <span class="metric-label-text"><i class="fas fa-thermometer-half" aria-hidden="true"></i> Temperature</span>
                 </div>
-                <div class="metric-value" data-temperature>{{ weather_data.temperature_c }}°C<span class="trend-indicator" data-trend-temperature style="display:none;"></span></div>
+                <div class="metric-value" data-temperature aria-live="polite">{{ weather_data.temperature_c }}°C<span class="trend-indicator" data-trend-temperature style="display:none;"></span></div>
+                <div class="data-freshness" data-freshness-temperature>
+                    <i class="fas fa-clock" aria-hidden="true"></i>
+                    <span>Checking...</span>
+                </div>
                 <div class="metric-tooltip">
                     <div style="font-weight: 700; margin-bottom: 8px; font-size: 13px; color: #f87171;"><i class="fas fa-thermometer-half"></i> Air Temperature</div>
                     <div style="font-size: 11px; line-height: 1.6;">
@@ -4187,12 +4377,15 @@
                 </div>
             </div>
 
-            <div class="metric-item">
+            <div class="metric-item" role="region" aria-label="Humidity measurement">
                 <div class="metric-label">
-                    <span class="metric-label-text"><i class="fas fa-tint"></i> Humidity</span>
-                    <span class="weather-icon">{% if weather_data.humidity_percent >= 90 %}💦{% elif weather_data.humidity_percent >= 80 %}💧{% elif weather_data.humidity_percent >= 60 %}💨{% else %}☀️{% endif %}</span>
+                    <span class="metric-label-text"><i class="fas fa-tint" aria-hidden="true"></i> Humidity</span>
                 </div>
-                <div class="metric-value" data-humidity>{{ weather_data.humidity_percent }}%<span class="trend-indicator" data-trend-humidity style="display:none;"></span></div>
+                <div class="metric-value" data-humidity aria-live="polite">{{ weather_data.humidity_percent }}%<span class="trend-indicator" data-trend-humidity style="display:none;"></span></div>
+                <div class="data-freshness" data-freshness-humidity>
+                    <i class="fas fa-clock" aria-hidden="true"></i>
+                    <span>Checking...</span>
+                </div>
                 <div class="metric-tooltip">
                     <div style="font-weight: 700; margin-bottom: 8px; font-size: 13px; color: #8b5cf6;"><i class="fas fa-tint"></i> Relative Humidity</div>
                     <div style="font-size: 11px; line-height: 1.6;">
@@ -4217,12 +4410,15 @@
                 </div>
             </div>
 
-            <div class="metric-item">
+            <div class="metric-item" role="region" aria-label="Wind speed measurement">
                 <div class="metric-label">
-                    <span class="metric-label-text"><i class="fas fa-wind"></i> Wind Speed</span>
-                    <span class="weather-icon">{% if weather_data.wind_speed_kph >= 60 %}🌪️{% elif weather_data.wind_speed_kph >= 40 %}💨{% elif weather_data.wind_speed_kph >= 20 %}🍃{% else %}🌾{% endif %}</span>
+                    <span class="metric-label-text"><i class="fas fa-wind" aria-hidden="true"></i> Wind Speed</span>
                 </div>
-                <div class="metric-value" data-wind>{{ weather_data.wind_speed_kph }} km/h<span class="trend-indicator" data-trend-wind style="display:none;"></span></div>
+                <div class="metric-value" data-wind aria-live="polite">{{ weather_data.wind_speed_kph }} km/h<span class="trend-indicator" data-trend-wind style="display:none;"></span></div>
+                <div class="data-freshness" data-freshness-wind>
+                    <i class="fas fa-clock" aria-hidden="true"></i>
+                    <span>Checking...</span>
+                </div>
                 <div class="metric-tooltip">
                     <div style="font-weight: 700; margin-bottom: 8px; font-size: 13px; color: #fbbf24;"><i class="fas fa-wind"></i> Wind Speed</div>
                     <div style="font-size: 11px; line-height: 1.6;">
@@ -4247,12 +4443,15 @@
                 </div>
             </div>
 
-            <div class="metric-item">
+            <div class="metric-item" role="region" aria-label="Tide level measurement">
                 <div class="metric-label">
-                    <span class="metric-label-text"><i class="fas fa-water"></i> Tide Level</span>
-                    <span class="weather-icon">{% if tide_data.height_m >= 1.5 %}🌊{% elif tide_data.height_m >= 1.0 %}🏖️{% else %}🏝️{% endif %}</span>
+                    <span class="metric-label-text"><i class="fas fa-water" aria-hidden="true"></i> Tide Level</span>
                 </div>
-                <div class="metric-value" data-tide>{{ tide_data.height_m }} m<span class="trend-indicator" data-trend-tide style="display:none;"></span></div>
+                <div class="metric-value" data-tide aria-live="polite">{{ tide_data.height_m }} m<span class="trend-indicator" data-trend-tide style="display:none;"></span></div>
+                <div class="data-freshness" data-freshness-tide>
+                    <i class="fas fa-clock" aria-hidden="true"></i>
+                    <span>Checking...</span>
+                </div>
                 <div class="metric-tooltip">
                     <div style="font-weight: 700; margin-bottom: 8px; font-size: 13px; color: #10b981;"><i class="fas fa-water"></i> Tidal Height</div>
                     <div style="font-size: 11px; line-height: 1.6;">
@@ -4268,7 +4467,7 @@
                         <div style="margin-bottom: 8px;">
                             <div><strong>🔄 Data Source:</strong> WorldTides API</div>
                             <div><strong>⏱️ Last Updated:</strong> {{ tide_data.timestamp|date:"M d, Y H:i" }}</div>
-                            <div style="color: #9ca3af; font-size: 10px;">Updates every 3 hours</div>
+                            <div style="color: #9ca3af; font-size: 10px;">Updates every 1 hour</div>
                         </div>
                         <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.15);">
                             <strong>Flood Impact:</strong>
@@ -7404,6 +7603,15 @@
         const windSpeed = {{ forecast_wind_speed|safe }};
         const dates = {{ forecast_dates|safe }};
 
+        // Check if data exists
+        if (!tempMax.length || !dates.length) {
+            document.getElementById('temp-insight').querySelector('span').textContent = 'No forecast data available';
+            document.getElementById('precip-insight').querySelector('span').textContent = 'No forecast data available';
+            document.getElementById('humidity-insight').querySelector('span').textContent = 'No forecast data available';
+            document.getElementById('wind-insight').querySelector('span').textContent = 'No forecast data available';
+            return;
+        }
+
         // Temperature Insights
         const avgTempMax = (tempMax.reduce((a, b) => a + b, 0) / tempMax.length).toFixed(1);
         const avgTempMin = (tempMin.reduce((a, b) => a + b, 0) / tempMin.length).toFixed(1);
@@ -7424,11 +7632,19 @@
         const totalRain = precipitation.reduce((a, b) => a + b, 0).toFixed(1);
         const heavyRainDays = precipitation.filter(p => p > 50).length;
         const maxRain = Math.max(...precipitation);
-        const maxRainDay = precipitation.indexOf(maxRain);
+        // Find the correct index for max rain day
+        let maxRainDay = -1;
+        for (let i = 0; i < precipitation.length; i++) {
+            if (precipitation[i] === maxRain) {
+                maxRainDay = i;
+                break;
+            }
+        }
         
         let precipInsight = `Total expected: ${totalRain}mm over 7 days. `;
         if (heavyRainDays > 0) {
-            precipInsight += `⚠️ ${heavyRainDays} day(s) with heavy rain (>50mm). Peak: ${maxRain}mm on ${dates[maxRainDay]} - High flood risk.`;
+            const rainDay = maxRainDay >= 0 && maxRainDay < dates.length ? dates[maxRainDay] : 'unknown';
+            precipInsight += `⚠️ ${heavyRainDays} day(s) with heavy rain (>50mm). Peak: ${maxRain.toFixed(1)}mm on ${rainDay} - High flood risk.`;
         } else if (totalRain > 100) {
             precipInsight += `Moderate rainfall expected - monitor drainage systems.`;
         } else if (totalRain < 30) {
@@ -7446,7 +7662,7 @@
         if (highHumidityDays >= 4) {
             humidityInsight += `${highHumidityDays} days with high humidity (>80%) - saturated conditions may reduce soil absorption.`;
         } else if (maxHumidity > 85) {
-            humidityInsight += `Peak humidity ${maxHumidity}% - near-saturation conditions expected.`;
+            humidityInsight += `Peak humidity ${maxHumidity.toFixed(0)}% - near-saturation conditions expected.`;
         } else if (avgHumidity < 65) {
             humidityInsight += `Relatively dry conditions - better soil absorption capacity.`;
         } else {
@@ -7456,14 +7672,23 @@
         // Wind Speed Insights
         const avgWind = (windSpeed.reduce((a, b) => a + b, 0) / windSpeed.length).toFixed(1);
         const maxWind = Math.max(...windSpeed);
-        const maxWindDay = windSpeed.indexOf(maxWind);
+        // Find the correct index for max wind day
+        let maxWindDay = -1;
+        for (let i = 0; i < windSpeed.length; i++) {
+            if (windSpeed[i] === maxWind) {
+                maxWindDay = i;
+                break;
+            }
+        }
         const stormDays = windSpeed.filter(w => w > 40).length;
         
         let windInsight = `Average: ${avgWind} km/h. `;
         if (stormDays > 0) {
-            windInsight += `⚠️ ${stormDays} day(s) with strong winds (>40 km/h). Peak: ${maxWind} km/h on ${dates[maxWindDay]} - Storm warning.`;
+            const windDay = maxWindDay >= 0 && maxWindDay < dates.length ? dates[maxWindDay] : 'unknown';
+            windInsight += `⚠️ ${stormDays} day(s) with strong winds (>40 km/h). Peak: ${maxWind.toFixed(1)} km/h on ${windDay} - Storm warning.`;
         } else if (maxWind > 35) {
-            windInsight += `Peak wind ${maxWind} km/h on ${dates[maxWindDay]} - moderate wind conditions.`;
+            const windDay = maxWindDay >= 0 && maxWindDay < dates.length ? dates[maxWindDay] : 'unknown';
+            windInsight += `Peak wind ${maxWind.toFixed(1)} km/h on ${windDay} - moderate wind conditions.`;
         } else if (avgWind < 15) {
             windInsight += `Light winds expected - calm weather conditions.`;
         } else {
@@ -7554,7 +7779,7 @@
     updateMetricIcons();
 
     // Refresh countdown timer
-    let refreshSeconds = 300; // 5 minutes = 300 seconds
+    let refreshSeconds = 3600; // 60 minutes = 3600 seconds (matches API update frequency)
     const refreshTimerElement = document.getElementById('refresh-timer');
 
     function updateRefreshTimer() {
@@ -7567,7 +7792,7 @@
         if (refreshSeconds > 0) {
             refreshSeconds--;
         } else {
-            refreshSeconds = 300; // Reset to 5 minutes
+            refreshSeconds = 3600; // Reset to 60 minutes
         }
     }
 
@@ -7610,11 +7835,153 @@
         }
     }
 
-    // Auto-refresh every 5 minutes
-    setInterval(function() {
+    // Auto-refresh every 5 minutes with enhancements
+    let fetchErrorCount = 0;
+    const MAX_ERROR_COUNT = 3;
+    
+    // Offline detection
+    window.addEventListener('online', function() {
+        document.getElementById('offlineAlert').classList.remove('show');
+        // Retry fetch when back online
+        setTimeout(retryFetch, 1000);
+    });
+    
+    window.addEventListener('offline', function() {
+        document.getElementById('offlineAlert').classList.add('show');
+    });
+    
+    // Function to close error alert
+    function closeErrorAlert() {
+        document.getElementById('apiErrorAlert').classList.remove('show');
+    }
+    
+    // Function to retry fetch
+    function retryFetch() {
+        closeErrorAlert();
+        fetchMetricData();
+    }
+    
+    // Store current timestamps globally
+    let currentTimestamps = {
+        rainfall: '{{ rainfall_data.timestamp|date:"M d, Y H:i" }}',
+        weather: '{{ weather_data.timestamp|date:"M d, Y H:i" }}',
+        tide: '{{ tide_data.timestamp|date:"M d, Y H:i" }}'
+    };
+    
+    // Function to calculate time ago
+    function getTimeAgo(timestamp) {
+        if (!timestamp || timestamp === '') return { text: 'Unknown', class: 'freshness-stale' };
+        
+        try {
+            const now = new Date();
+            const past = new Date(timestamp);
+            
+            // Check if date is valid
+            if (isNaN(past.getTime())) {
+                return { text: 'Unknown', class: 'freshness-stale' };
+            }
+            
+            const diffMs = now - past;
+            const diffMins = Math.floor(diffMs / 60000);
+            
+            // Handle future dates (shouldn't happen but just in case)
+            if (diffMins < 0) {
+                return { text: 'Just now', class: 'freshness-good' };
+            }
+            
+            if (diffMins < 5) {
+                return { text: 'Just now', class: 'freshness-good' };
+            } else if (diffMins < 15) {
+                return { text: diffMins + ' mins ago', class: 'freshness-good' };
+            } else if (diffMins < 60) {
+                return { text: diffMins + ' mins ago', class: 'freshness-medium' };
+            } else if (diffMins < 180) {
+                const hours = Math.floor(diffMins / 60);
+                return { text: hours + (hours === 1 ? ' hour ago' : ' hours ago'), class: 'freshness-medium' };
+            } else {
+                const hours = Math.floor(diffMins / 60);
+                return { text: hours + ' hours ago', class: 'freshness-stale' };
+            }
+        } catch (error) {
+            console.error('Error calculating time ago:', error);
+            return { text: 'Unknown', class: 'freshness-stale' };
+        }
+    }
+    
+    // Function to update freshness indicators
+    function updateFreshnessIndicators(timestamps) {
+        const metrics = ['rainfall', 'temperature', 'humidity', 'wind', 'tide'];
+        
+        metrics.forEach(metric => {
+            const freshnessEl = document.querySelector(`[data-freshness-${metric}] span`);
+            const freshnessContainer = document.querySelector(`[data-freshness-${metric}]`);
+            
+            if (freshnessEl && freshnessContainer) {
+                let timestamp;
+                if (metric === 'rainfall' && timestamps.rainfall) {
+                    timestamp = timestamps.rainfall;
+                } else if (['temperature', 'humidity', 'wind'].includes(metric) && timestamps.weather) {
+                    timestamp = timestamps.weather;
+                } else if (metric === 'tide' && timestamps.tide) {
+                    timestamp = timestamps.tide;
+                }
+                
+                const timeInfo = getTimeAgo(timestamp);
+                freshnessEl.textContent = timeInfo.text;
+                
+                // Remove all freshness classes
+                freshnessContainer.classList.remove('freshness-good', 'freshness-medium', 'freshness-stale');
+                // Add appropriate class
+                freshnessContainer.classList.add(timeInfo.class);
+            }
+        });
+    }
+    
+    // Function to show loading state
+    function showLoadingState() {
+        const metricItems = document.querySelectorAll('.metric-item');
+        metricItems.forEach(item => item.classList.add('loading'));
+    }
+    
+    // Function to hide loading state
+    function hideLoadingState() {
+        const metricItems = document.querySelectorAll('.metric-item');
+        metricItems.forEach(item => item.classList.remove('loading'));
+    }
+    
+    // Function to show error alert
+    function showErrorAlert(message) {
+        const errorAlert = document.getElementById('apiErrorAlert');
+        const errorMessage = document.getElementById('errorMessage');
+        errorMessage.textContent = message || 'Unable to fetch latest data from the server. Data may be outdated.';
+        errorAlert.classList.add('show');
+        
+        // Auto-hide after 10 seconds
+        setTimeout(() => {
+            errorAlert.classList.remove('show');
+        }, 10000);
+    }
+    
+    // Main fetch function
+    function fetchMetricData() {
+        // Check if online
+        if (!navigator.onLine) {
+            document.getElementById('offlineAlert').classList.add('show');
+            return;
+        }
+        
+        showLoadingState();
+        
         fetch('{% url "fetch_data" %}')
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
             .then(data => {
+                hideLoadingState();
+                fetchErrorCount = 0; // Reset error count on success
                 // Get current values
                 const currentRainfall = parseFloat(data.rainfall);
                 const currentTemperature = parseFloat(data.temperature);
@@ -7636,10 +8003,10 @@
                 const windEl = document.querySelector('[data-wind]');
                 const tideEl = document.querySelector('[data-tide]');
 
-                // Helper function to update text node only
+                // Helper function to update text node only (preserving trend indicator)
                 function updateMetricValue(element, value) {
                     if (!element) return;
-                    // Get the first text node or create one
+                    // Find and update the first text node, or create if none exists
                     let textNode = null;
                     for (let node of element.childNodes) {
                         if (node.nodeType === Node.TEXT_NODE) {
@@ -7648,17 +8015,30 @@
                         }
                     }
                     if (textNode) {
-                        textNode.textContent = value;
+                        textNode.nodeValue = value + ' ';
                     } else {
-                        element.insertBefore(document.createTextNode(value), element.firstChild);
+                        // Create text node at the beginning
+                        element.insertBefore(document.createTextNode(value + ' '), element.firstChild);
                     }
                 }
 
-                updateMetricValue(rainfallEl, currentRainfall + ' mm');
-                updateMetricValue(tempEl, currentTemperature + '°C');
-                updateMetricValue(humidityEl, currentHumidity + '%');
-                updateMetricValue(windEl, currentWind + ' km/h');
-                updateMetricValue(tideEl, currentTide + ' m');
+                // Update the displayed values immediately
+                updateMetricValue(rainfallEl, currentRainfall.toFixed(2) + ' mm');
+                updateMetricValue(tempEl, currentTemperature.toFixed(1) + '°C');
+                updateMetricValue(humidityEl, currentHumidity.toFixed(0) + '%');
+                updateMetricValue(windEl, currentWind.toFixed(1) + ' km/h');
+                updateMetricValue(tideEl, currentTide.toFixed(2) + ' m');
+
+                // Update freshness indicators
+                if (data.timestamps) {
+                    // Update global timestamps
+                    currentTimestamps = {
+                        rainfall: data.timestamps.rainfall || currentTimestamps.rainfall,
+                        weather: data.timestamps.weather || currentTimestamps.weather,
+                        tide: data.timestamps.tide || currentTimestamps.tide
+                    };
+                    updateFreshnessIndicators(currentTimestamps);
+                }
 
                 // Update timestamps in tooltips if available
                 if (data.timestamps) {
@@ -7712,12 +8092,34 @@
                 };
                 
                 // Reset countdown
-                refreshSeconds = 300;
+                refreshSeconds = 3600;
             })
             .catch(error => {
                 console.error('Error fetching data:', error);
+                hideLoadingState();
+                fetchErrorCount++;
+                
+                // Show error alert
+                if (fetchErrorCount <= MAX_ERROR_COUNT) {
+                    showErrorAlert('Failed to fetch latest data. Will retry automatically.');
+                } else {
+                    showErrorAlert('Multiple connection failures detected. Please check your internet connection.');
+                }
             });
-    }, 300000);
+    }
+    
+    // Call fetchMetricData instead of inline fetch
+    setInterval(fetchMetricData, 3600000); // Every 60 minutes (matches API hourly updates)
+    
+    // Initialize freshness indicators on page load
+    setTimeout(() => {
+        updateFreshnessIndicators(currentTimestamps);
+    }, 500);
+    
+    // Update freshness indicators every minute (using current timestamps)
+    setInterval(() => {
+        updateFreshnessIndicators(currentTimestamps);
+    }, 60000);
 
     // Keyboard Navigation
     document.addEventListener('keydown', function(e) {
