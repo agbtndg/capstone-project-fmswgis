@@ -87,6 +87,10 @@
             box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
             position: relative;
             overflow: hidden;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
         }
         
         .page-header::before {
@@ -118,6 +122,36 @@
             position: relative;
             z-index: 1;
             margin: 0;
+        }
+
+        /* Real-Time Clock */
+        .realtime-clock {
+            text-align: right;
+            color: white;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+        }
+
+        .clock-time {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            color: white;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            font-family: 'Courier New', monospace;
+            line-height: 1;
+        }
+
+        .clock-date {
+            font-size: 14px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.95);
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
         }
 
         /* Buttons */
@@ -1264,10 +1298,25 @@
 
             .page-header {
                 padding: 24px 20px;
+                flex-direction: column;
+                align-items: flex-start;
             }
 
             .page-header h1 {
                 font-size: 24px;
+            }
+
+            .realtime-clock {
+                align-items: flex-start;
+                margin-top: 16px;
+            }
+
+            .clock-time {
+                font-size: 28px;
+            }
+
+            .clock-date {
+                font-size: 13px;
             }
 
             .card {
@@ -1324,6 +1373,14 @@
         @media (max-width: 480px) {
             .page-header h1 {
                 font-size: 20px;
+            }
+
+            .clock-time {
+                font-size: 24px;
+            }
+
+            .clock-date {
+                font-size: 12px;
             }
 
             .metric-value {
@@ -3994,6 +4051,10 @@
             <h1>Real-Time Monitoring</h1>
             <p>Flood risk assessment and environmental data tracking for Silay City</p>
         </div>
+        <div class="realtime-clock">
+            <div class="clock-time" id="live-clock">--:--:-- --</div>
+            <div class="clock-date" id="live-date">Loading...</div>
+        </div>
     </div>
 
     <!-- Quick Navigation -->
@@ -4900,6 +4961,44 @@
     let rainfallTrendChart, tideTrendChart;
 
     document.addEventListener('DOMContentLoaded', function() {
+        // Real-Time Clock Functionality
+        function updateClock() {
+            const now = new Date();
+            
+            // Format time in 12-hour format with AM/PM
+            let hours = now.getHours();
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const seconds = now.getSeconds().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            
+            // Convert to 12-hour format
+            hours = hours % 12;
+            hours = hours ? hours : 12; // 0 should be 12
+            const hoursStr = hours.toString().padStart(2, '0');
+            
+            // Format date: "Wednesday, January 8, 2026"
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const dateStr = now.toLocaleDateString('en-US', options);
+            
+            // Update DOM elements
+            const clockElement = document.getElementById('live-clock');
+            const dateElement = document.getElementById('live-date');
+            
+            if (clockElement) {
+                clockElement.textContent = `${hoursStr}:${minutes}:${seconds} ${ampm}`;
+            }
+            
+            if (dateElement) {
+                dateElement.textContent = dateStr;
+            }
+        }
+        
+        // Update clock immediately
+        updateClock();
+        
+        // Update clock every second
+        setInterval(updateClock, 1000);
+        
         // Back to Top Button Functionality
         const backToTopButton = document.getElementById('back-to-top');
         
