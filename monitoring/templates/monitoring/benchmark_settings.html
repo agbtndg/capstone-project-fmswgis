@@ -1,0 +1,587 @@
+{% extends 'users/base.html' %}
+{% load static %}
+
+{% block title %}Benchmark Settings - Flood Monitoring System{% endblock %}
+
+{% block styles %}
+<style>
+    :root {
+        --primary-blue: #1e3a5f;
+        --secondary-blue: #2563eb;
+        --light-gray: #f8fafc;
+        --border-gray: #e2e8f0;
+        --text-dark: #1e293b;
+        --text-muted: #64748b;
+    }
+
+    .benchmark-container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        background: white;
+        padding: 32px 28px;
+        border-radius: 20px;
+        border: 2px solid #e0e7ff;
+        margin-bottom: 28px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 
+            0 8px 24px rgba(0, 0, 0, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    }
+
+    .page-header h1 {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--primary-blue);
+        margin-bottom: 6px;
+        letter-spacing: -0.02em;
+    }
+
+    .page-header p {
+        font-size: 14px;
+        color: var(--text-muted);
+        font-weight: 600;
+    }
+
+    .back-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 20px;
+        background: linear-gradient(135deg, var(--secondary-blue), var(--primary-blue));
+        color: white;
+        border-radius: 12px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 700;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: none;
+        box-shadow: 0 4px 16px rgba(37, 99, 235, 0.25);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .back-btn::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .back-btn:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .back-btn:hover {
+        background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+        text-decoration: none;
+        color: white;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 32px rgba(37, 99, 235, 0.4);
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 24px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid #93c5fd;
+    }
+
+    .section-header i {
+        font-size: 24px;
+        color: var(--secondary-blue);
+    }
+
+    .section-header h2 {
+        font-size: 20px;
+        font-weight: 800;
+        color: var(--text-dark);
+        margin: 0;
+        letter-spacing: -0.01em;
+    }
+
+    .card {
+        background: white;
+        border-radius: 20px;
+        border: 2px solid #e0e7ff;
+        box-shadow: 
+            0 4px 16px rgba(0, 0, 0, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        overflow: hidden;
+        margin-bottom: 24px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .card:hover {
+        box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 1);
+        border-color: #93c5fd;
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        padding: 20px 24px;
+        border-bottom: 2px solid #93c5fd;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .card-header h5 {
+        font-size: 18px;
+        font-weight: 800;
+        color: var(--text-dark);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        letter-spacing: -0.01em;
+    }
+
+    .card-header i {
+        font-size: 20px;
+        color: var(--secondary-blue);
+    }
+
+    .card-body {
+        padding: 24px;
+    }
+
+    .form-label {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 8px;
+        display: block;
+        letter-spacing: 0.02em;
+    }
+
+    .form-control {
+        border: 2px solid #e0e7ff;
+        border-radius: 10px;
+        padding: 10px 12px;
+        font-size: 14px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-weight: 500;
+    }
+
+    .form-control:focus {
+        border-color: var(--secondary-blue);
+        box-shadow: 
+            0 0 0 4px rgba(37, 99, 235, 0.15),
+            0 4px 12px rgba(37, 99, 235, 0.1);
+        outline: none;
+        transform: translateY(-1px);
+    }
+
+    .input-group-text {
+        border: 2px solid #e0e7ff;
+        border-left: none;
+        border-radius: 0 10px 10px 0;
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        color: var(--text-muted);
+        font-weight: 700;
+        font-size: 13px;
+    }
+
+    .alert {
+        border-radius: 12px;
+        padding: 14px 18px;
+        font-size: 14px;
+        border-left: 4px solid;
+        margin-top: 16px;
+        font-weight: 600;
+    }
+
+    .alert-dismissible .btn-close {
+        padding: 12px;
+    }
+
+    .threshold-info {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 12px;
+    }
+
+    .threshold-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 14px;
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .threshold-row i {
+        color: var(--secondary-blue);
+    }
+
+    .risk-card {
+        padding: 20px;
+        border-radius: 16px;
+        border: 2px solid;
+        height: 100%;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .risk-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .risk-card h6 {
+        font-size: 16px;
+        font-weight: 800;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        letter-spacing: -0.01em;
+    }
+
+    .risk-card p {
+        font-size: 13px;
+        line-height: 1.6;
+        margin: 0;
+        font-weight: 600;
+    }
+
+    .risk-card small {
+        display: block;
+        margin-top: 12px;
+        font-size: 12px;
+        opacity: 0.8;
+    }
+
+    .btn {
+        padding: 12px 24px;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 700;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: none;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .btn:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        box-shadow: 0 4px 16px rgba(16, 185, 129, 0.25);
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 32px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-secondary {
+        background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+        color: white;
+        box-shadow: 0 4px 16px rgba(107, 114, 128, 0.25);
+    }
+
+    .btn-secondary:hover {
+        background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 32px rgba(107, 114, 128, 0.4);
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .risk-card {
+            margin-bottom: 16px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="benchmark-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div>
+            <h1><i class="fas fa-sliders-h"></i> Benchmark Settings</h1>
+            <p>Configure flood risk thresholds and alert benchmarks</p>
+        </div>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Benchmark Settings Form -->
+    <form method="post" id="benchmarkForm">
+        {% csrf_token %}
+
+        <!-- Rainfall Benchmarks Section -->
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-cloud-rain"></i> Rainfall Benchmarks (mm)</h5>
+            </div>
+            <div class="card-body">
+                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">
+                    Define rainfall thresholds for risk assessment. Moderate threshold must be lower than High threshold.
+                </p>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="rainfall_moderate" class="form-label">
+                            Moderate Risk Threshold <span style="color: #ef4444;">*</span>
+                        </label>
+                        <div class="input-group">
+                            <input 
+                                type="number" 
+                                class="form-control" 
+                                id="rainfall_moderate"
+                                name="rainfall_moderate_threshold" 
+                                value="{{ settings.rainfall_moderate_threshold }}"
+                                step="0.5"
+                                min="0"
+                                required
+                            >
+                            <span class="input-group-text">mm</span>
+                        </div>
+                        <small style="color: var(--text-muted); display: block; margin-top: 6px;">
+                            Triggers <span style="color: #f97316; font-weight: 700;">ORANGE (Moderate)</span> risk
+                        </small>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="rainfall_high" class="form-label">
+                            High Risk Threshold <span style="color: #ef4444;">*</span>
+                        </label>
+                        <div class="input-group">
+                            <input 
+                                type="number" 
+                                class="form-control" 
+                                id="rainfall_high"
+                                name="rainfall_high_threshold" 
+                                value="{{ settings.rainfall_high_threshold }}"
+                                step="0.5"
+                                min="0"
+                                required
+                            >
+                            <span class="input-group-text">mm</span>
+                        </div>
+                        <small style="color: var(--text-muted); display: block; margin-top: 6px;">
+                            Triggers <span style="color: #ef4444; font-weight: 700;">RED (High)</span> risk
+                        </small>
+                    </div>
+                </div>
+
+                <div class="alert alert-info" style="background-color: #dbeafe; border-color: #93c5fd; color: #1e40af;">
+                    <small>
+                        <i class="fas fa-info-circle"></i> 
+                        Currently: <strong>&lt; {{ settings.rainfall_moderate_threshold }}mm</strong> = Yellow (Low),
+                        <strong>{{ settings.rainfall_moderate_threshold }}-{{ settings.rainfall_high_threshold }}mm</strong> = Orange (Moderate),
+                        <strong>≥ {{ settings.rainfall_high_threshold }}mm</strong> = Red (High)
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tide Level Benchmarks Section -->
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-water"></i> Tide Level Benchmarks (meters)</h5>
+            </div>
+            <div class="card-body">
+                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">
+                    Define tide level thresholds for risk assessment. Moderate threshold must be lower than High threshold.
+                </p>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="tide_moderate" class="form-label">
+                            Moderate Risk Threshold <span style="color: #ef4444;">*</span>
+                        </label>
+                        <div class="input-group">
+                            <input 
+                                type="number" 
+                                class="form-control" 
+                                id="tide_moderate"
+                                name="tide_moderate_threshold" 
+                                value="{{ settings.tide_moderate_threshold }}"
+                                step="0.1"
+                                min="0"
+                                required
+                            >
+                            <span class="input-group-text">m</span>
+                        </div>
+                        <small style="color: var(--text-muted); display: block; margin-top: 6px;">
+                            Triggers <span style="color: #f97316; font-weight: 700;">ORANGE (Moderate)</span> risk
+                        </small>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="tide_high" class="form-label">
+                            High Risk Threshold <span style="color: #ef4444;">*</span>
+                        </label>
+                        <div class="input-group">
+                            <input 
+                                type="number" 
+                                class="form-control" 
+                                id="tide_high"
+                                name="tide_high_threshold" 
+                                value="{{ settings.tide_high_threshold }}"
+                                step="0.1"
+                                min="0"
+                                required
+                            >
+                            <span class="input-group-text">m</span>
+                        </div>
+                        <small style="color: var(--text-muted); display: block; margin-top: 6px;">
+                            Triggers <span style="color: #ef4444; font-weight: 700;">RED (High)</span> risk
+                        </small>
+                    </div>
+                </div>
+
+                <div class="alert alert-info" style="background-color: #cffafe; border-color: #a5f3fc; color: #0c7792;">
+                    <small>
+                        <i class="fas fa-info-circle"></i> 
+                        Currently: <strong>&lt; {{ settings.tide_moderate_threshold }}m</strong> = Yellow (Low),
+                        <strong>{{ settings.tide_moderate_threshold }}-{{ settings.tide_high_threshold }}m</strong> = Orange (Moderate),
+                        <strong>≥ {{ settings.tide_high_threshold }}m</strong> = Red (High)
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Combined Risk Logic Explanation -->
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-pie"></i> Alert Logic</h5>
+            </div>
+            <div class="card-body">
+                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">
+                    The alert level is determined by checking if <strong>BOTH</strong> rainfall AND tide level meet their thresholds simultaneously.
+                </p>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="risk-card" style="background-color: #fef3c7; border-color: #fcd34d; color: #92400e;">
+                            <h6><i class="fas fa-circle" style="color: #fcd34d;"></i> Low Risk (Yellow)</h6>
+                            <p>
+                                Rainfall &lt; {{ settings.rainfall_moderate_threshold }}mm<br>
+                                <strong>OR</strong><br>
+                                Tide &lt; {{ settings.tide_moderate_threshold }}m
+                            </p>
+                            <small>Both thresholds not met</small>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <div class="risk-card" style="background-color: #fed7aa; border-color: #fdba74; color: #9a3412;">
+                            <h6><i class="fas fa-circle" style="color: #fdba74;"></i> Moderate Risk (Orange)</h6>
+                            <p>
+                                Rainfall ≥ {{ settings.rainfall_moderate_threshold }}mm<br>
+                                <strong>AND</strong><br>
+                                Tide ≥ {{ settings.tide_moderate_threshold }}m
+                            </p>
+                            <small>Both moderate thresholds met</small>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <div class="risk-card" style="background-color: #fecaca; border-color: #fca5a5; color: #7f1d1d;">
+                            <h6><i class="fas fa-circle" style="color: #fca5a5;"></i> High Risk (Red)</h6>
+                            <p>
+                                Rainfall ≥ {{ settings.rainfall_high_threshold }}mm<br>
+                                <strong>AND</strong><br>
+                                Tide ≥ {{ settings.tide_high_threshold }}m
+                            </p>
+                            <small>Both high thresholds met</small>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <div class="risk-card" style="background-color: #e0e7ff; border-color: #c7d2fe; color: #3730a3;">
+                            <h6><i class="fas fa-lightbulb"></i> Example</h6>
+                            <p>
+                                Rainfall: 32mm (≥30)<br>
+                                Tide: 0.3m (&lt;1.0)<br>
+                                <strong style="color: #1f2937;">Result: Low Risk</strong>
+                            </p>
+                            <small>Because tide didn't meet its threshold</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-info" style="background-color: #f3e8ff; border-color: #ddd6fe; color: #6b21a8;">
+                    <small>
+                        <i class="fas fa-info-circle"></i> 
+                        <strong>Key Point:</strong> Both rainfall AND tide must meet the threshold at the same time to trigger that risk level. If only one meets the threshold, the alert remains at a lower level.
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="d-flex gap-2" style="margin-top: 24px;">
+            <button type="submit" class="btn btn-primary flex-grow-1">
+                <i class="fas fa-save"></i> Save Changes
+            </button>
+            <a href="{% url 'monitoring_view' %}" class="btn btn-secondary flex-grow-1">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </div>
+
+        <!-- Info Box -->
+        <div class="alert" style="border-left: 4px solid var(--secondary-blue); margin-top: 24px; background-color: #f8fafc;">
+            <small style="color: var(--text-muted);">
+                <strong><i class="fas fa-info-circle"></i> Note:</strong> Changes to these benchmarks will take effect immediately and apply to all future risk calculations across the monitoring dashboard. Alerts are automatically generated based on the rainfall and tide level risk levels.
+            </small>
+        </div>
+    </form>
+</div>
+{% endblock %}

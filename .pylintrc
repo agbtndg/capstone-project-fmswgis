@@ -1,0 +1,46 @@
+[MASTER]
+load-plugins=pylint_django
+django-settings-module=silay_drrmo.settings
+
+# Ignore patterns
+ignore=migrations,venv,staticfiles,media,__pycache__
+
+[MESSAGES CONTROL]
+# Disable specific Django-related warnings
+disable=
+    # Documentation
+    missing-module-docstring,
+    missing-class-docstring,
+    missing-function-docstring,
+    # Django specific
+    no-member,
+    too-few-public-methods,
+    import-outside-toplevel,
+    # Style preferences
+    line-too-long,
+    invalid-name,
+    # Less critical
+    too-many-locals,
+    too-many-arguments,
+    too-many-instance-attributes,
+    too-many-branches,
+    too-many-statements,
+    duplicate-code,
+    # Django ORM
+    no-self-use
+
+[FORMAT]
+max-line-length=120
+indent-string='    '
+
+[BASIC]
+good-names=i,j,k,ex,Run,_,id,pk
+
+[DESIGN]
+max-parents=10
+max-attributes=10
+min-public-methods=0
+
+[TYPECHECK]
+# Django dynamic attributes
+generated-members=objects,DoesNotExist,id,pk,_meta,get_*

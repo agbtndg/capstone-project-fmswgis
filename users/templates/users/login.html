@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - DRRMO Silay City</title>
+    {% load static %}
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/ol.css' %}">
+    <style>
+        :root {
+            --primary-blue: #1e3a5f;
+            --secondary-blue: #2563eb;
+            --light-gray: #f8fafc;
+            --border-gray: #e2e8f0;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* Animated Satellite Map Background */
+        #background-map {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        #background-map-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(
+                135deg,
+                rgba(30, 58, 95, 0.50) 0%,
+                rgba(37, 99, 235, 0.50) 50%,
+                rgba(30, 58, 95, 0.50) 100%
+            );
+            pointer-events: none;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            width: 100%;
+            max-width: 480px;
+            padding: 50px 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--secondary-blue), var(--primary-blue));
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo-section {
+            margin-bottom: 24px;
+        }
+
+        .logo-section img {
+            height: 120px;
+            width: auto;
+            margin-bottom: 16px;
+        }
+
+        .header h2 {
+            color: var(--text-dark);
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 16px;
+            font-weight: 500;
+            line-height: 1.5;
+        }
+
+        .welcome-text {
+            color: var(--secondary-blue);
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        /* Toast notification styles */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-width: 400px;
+            pointer-events: auto; /* allow manual close */
+        }
+
+        .toast-notification {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
+            animation: slideInRight 0.4s ease-out;
+            border-left: 4px solid;
+            pointer-events: auto;
+            z-index: 10000;
+        }
+
+        .toast-notification.hiding {
+            animation: slideOutRight 0.4s ease-out forwards;
+        }
+
+        .toast-notification.toast-success {
+            border-left-color: #10b981;
+        }
+
+        .toast-notification.toast-error,
+        .toast-notification.toast-danger {
+            border-left-color: #ef4444;
+        }
+
+        .toast-notification.toast-warning {
+            border-left-color: #f59e0b;
+        }
+
+        .toast-notification.toast-info {
+            border-left-color: #3b82f6;
+        }
+
+        .toast-icon {
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .toast-success .toast-icon {
+            color: #10b981;
+            background: #d1fae5;
+        }
+
+        .toast-error .toast-icon,
+        .toast-danger .toast-icon {
+            color: #ef4444;
+            background: #fee2e2;
+        }
+
+        .toast-warning .toast-icon {
+            color: #f59e0b;
+            background: #fef3c7;
+        }
+
+        .toast-info .toast-icon {
+            color: #3b82f6;
+            background: #dbeafe;
+        }
+
+        .toast-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .toast-message {
+            margin: 0;
+            color: var(--text-dark);
+            font-size: 14px;
+            font-weight: 500;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+            pointer-events: auto;
+            z-index: 99999;
+        }
+
+        .toast-close:hover {
+            background: var(--border-gray);
+            color: var(--text-dark);
+        }
+
+        .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: currentColor;
+            opacity: 0.3;
+            animation: shrink 5s linear forwards;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOutRight {
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
+        @keyframes shrink {
+            from {
+                width: 100%;
+            }
+            to {
+                width: 0;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            color: var(--text-dark);
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 16px;
+            z-index: 10; /* higher than bootstrap focus z-index so icon stays visible */
+            pointer-events: none; /* allow clicks to pass through to input */
+        }
+
+        .form-control,
+        .form-control,
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            /* placeholder moved slightly to the right for login */
+            padding: 14px 16px 14px 40px;
+            border: 2px solid var(--border-gray);
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background-color: var(--light-gray);
+            font-family: inherit;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: var(--secondary-blue);
+            background-color: white;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .login-btn,
+        .btn-primary {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--secondary-blue), var(--primary-blue));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+            box-shadow: 0 4px 16px rgba(37, 99, 235, 0.2);
+        }
+
+        .login-btn:hover {
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .footer-link {
+            text-align: center;
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-gray);
+        }
+
+        .footer-link p {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .footer-link a {
+            color: var(--secondary-blue);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .footer-link a:hover {
+            color: var(--primary-blue);
+            text-decoration: underline;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 40px 24px;
+                margin: 16px;
+            }
+
+            .header h2 {
+                font-size: 28px;
+            }
+
+            .logo-section img {
+                height: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Satellite Map Background -->
+    <div id="background-map"></div>
+    <div id="background-map-overlay"></div>
+
+    <!-- Toast Notification Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="container">
+        <div class="header">
+            <div class="logo-section">
+                <img src="{% static 'images/drrmo_logo.png' %}" alt="SCDRRMO Logo">
+            </div>
+            <div class="welcome-text">Welcome Back</div>
+            <h2>DRRMO Silay City</h2>
+            <p>Disaster Risk Reduction and Management Office<br>Flood Monitoring & Early Warning System</p>
+        </div>
+
+        <!-- Toast notifications will appear here -->
+
+        <form method="post" autocomplete="off" data-form-type="other">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="username">Username</label>
+                <div class="input-group">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="username" name="username" class="form-control" placeholder="Enter your username" autocomplete="username" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password" autocomplete="new-password" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary">
+                <i class="fas fa-sign-in-alt" style="margin-right: 8px;"></i>Login to Dashboard
+            </button>
+        </form>
+
+        <div class="footer-link">
+            <p>Don't have an account? <a href="{% url 'register' %}">Create Account</a></p>
+            {% if not admin_exists %}
+            <p>Need admin access? <a href="{% url 'admin_register' %}">Register Admin Account</a></p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // TOAST NOTIFICATION SYSTEM
+        // ============================================
+        function showToast(message, type = 'info', duration = 5000) {
+            const container = document.getElementById('toastContainer');
+            
+            // Icon mapping
+            const icons = {
+                success: 'fa-check-circle',
+                error: 'fa-times-circle',
+                danger: 'fa-exclamation-circle',
+                warning: 'fa-exclamation-triangle',
+                info: 'fa-info-circle'
+            };
+            
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = `toast-notification toast-${type}`;
+            toast.innerHTML = `
+                <div class="toast-icon">
+                    <i class="fas ${icons[type] || icons.info}"></i>
+                </div>
+                <div class="toast-content">
+                    <p class="toast-message">${message}</p>
+                </div>
+                <button type="button" class="toast-close" aria-label="Close" onclick="dismissToast(this)">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="toast-progress"></div>
+            `;
+            
+            container.appendChild(toast);
+            
+            // Auto-dismiss after duration
+            const timer = setTimeout(() => {
+                dismissToast(toast.querySelector('.toast-close'));
+            }, duration);
+            
+            // Store timer for manual dismissal
+            toast.dataset.timer = timer;
+            
+            return toast;
+        }
+        
+        function dismissToast(button) {
+            const toast = button.closest('.toast-notification');
+            if (!toast) return;
+            
+            // Clear auto-dismiss timer
+            if (toast.dataset.timer) {
+                clearTimeout(parseInt(toast.dataset.timer));
+            }
+            
+            // Add hiding animation
+            toast.classList.add('hiding');
+            
+            // Remove from DOM after animation
+            setTimeout(() => {
+                toast.remove();
+            }, 400);
+        }
+        
+        // Display Django messages and errors as toasts on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Clear login form to prevent browser/password manager auto-fill
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            
+            {% if error %}
+                showToast("{{ error|escapejs }}", "error", 5000);
+            {% endif %}
+            
+            {% if messages %}
+                {% for message in messages %}
+                    showToast(
+                        "{{ message|escapejs }}", 
+                        "{{ message.tags|default:'info' }}",
+                        5000
+                    );
+                {% endfor %}
+            {% endif %}
+        });
+    </script>
+
+    <script src="{% static 'js/ol.js' %}"></script>
+    <script>
+        // ============================================
+        // ANIMATED SATELLITE BACKGROUND MAP
+        // ============================================
+        
+        // Silay City coordinates
+        var silayCenter = [122.975, 10.787];
+        
+        // Create satellite layer
+        var satelliteLayer = new ol.layer.Tile({
+            source: new ol.source.XYZ({
+                url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                maxZoom: 19
+            })
+        });
+        
+        // Initialize background map
+        var backgroundMap = new ol.Map({
+            target: 'background-map',
+            layers: [satelliteLayer],
+            controls: [], // No controls for background
+            interactions: [], // No interactions for background
+            view: new ol.View({
+                center: ol.proj.fromLonLat(silayCenter),
+                zoom: 15.5,
+                rotation: 0
+            })
+        });
+        
+        // Animation variables
+        var animationStep = 0;
+        var baseCenter = ol.proj.fromLonLat(silayCenter);
+        var baseZoom = 15.5;
+        var rotationSpeed = 0.0002; // Very slow rotation
+        var panRadius = 500; // Meters to pan in circle
+        
+        // Animation function
+        function animateBackground() {
+            animationStep += 0.0003; // Animation speed
+            
+            var view = backgroundMap.getView();
+            
+            // Circular panning motion
+            var offsetX = Math.sin(animationStep) * panRadius;
+            var offsetY = Math.cos(animationStep) * panRadius;
+            var newCenter = [
+                baseCenter[0] + offsetX,
+                baseCenter[1] + offsetY
+            ];
+            
+            // Smooth zoom oscillation
+            var zoomOffset = Math.sin(animationStep * 0.5) * 0.3;
+            var newZoom = baseZoom + zoomOffset;
+            
+            // Very subtle rotation
+            var newRotation = animationStep * rotationSpeed;
+            
+            view.setCenter(newCenter);
+            view.setZoom(newZoom);
+            view.setRotation(newRotation);
+            
+            requestAnimationFrame(animateBackground);
+        }
+        
+        // Start animation after map loads (1 second delay)
+        setTimeout(() => {
+            animateBackground();
+        }, 1000);
+        
+        console.log('Animated satellite background initialized');
+    </script>
